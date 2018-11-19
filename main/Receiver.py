@@ -1,6 +1,7 @@
 import socket
 import time
-
+from main.Currency import Cotacao
+from main import Location
 
 def start_receiver():
     host = socket.gethostname()
@@ -36,14 +37,30 @@ def start_receiver():
     conn.close()
 
 
+def get_dolar():
+    cot = Cotacao()
+    return '$' + str(cot.dolar())
+
+
+def get_euro():
+    cot = Cotacao()
+    return '€' + str(cot.euro())
+
+
+def get_location():
+    return Location.get_location()
+
+
 def decode_command(user_command):
     print('command received: ', user_command)
     return{
         '\server': socket.gethostname(),
-        '\dev': "Jean Juba"
+        '\dev': "Jean Juba",
+        '\dolar': get_dolar(),
+        '\euro': get_euro(),
+        '\location': get_location()
     }.get(user_command, "Not Found")
 
 
-#print(decode_command('\dev'))
 start_receiver()
 exit(0)
