@@ -3,6 +3,7 @@ import time
 from main.Currency import Cotacao
 from main import Location
 
+
 def start_receiver():
     host = socket.gethostname()
     port = 8899
@@ -31,8 +32,8 @@ def start_receiver():
             print('Message failed')
             break
 
-        time.sleep(1)
-        print('looping...')
+        # time.sleep(1)
+        # print('looping...')
 
     conn.close()
 

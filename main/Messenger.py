@@ -1,24 +1,68 @@
 import socket
-import sys
+from tkinter import *
 
 
-def start_messenger(arg):
-    host = socket.gethostname()
-    port = 8899
+class GUI:
 
-    s = socket.socket()#socket.AF_INET, socket.SOCK_STREAM)
+    def __init__(self):
+        self.root = None
+        self.text_field = None
+        self.text_box = None
 
-    s.connect((host, port))
+    def init_gui_tkinter(self):
+        self.root = Tk()
+        self.root.title('Graphic Interface')
+        rw = 800
+        rh = 330
+        sw = self.root.winfo_screenmmwidth()
+        sh = self.root.winfo_screenmmheight()
 
-    s.sendall(bytes(arg, encoding='UTF-8'))
+        x = int((sw/2) - (rw/2))
+        y = int((sh/2) - (rh/2))
+        print("sw: %d  sh: %d  x: %d  y: %d" % (sw, sh, x, y))
+        self.root.geometry("{}x{}+{}+{}".format(rw, rh, x, y))
 
-    data = s.recv(1024)
-    s.close()
+        top_frame = Frame(self.root, width=800, height=30)
+        top_frame.pack(fill=X)
+        Label(top_frame, text='Command: ').grid(row=0, column=0)
+        self.text_field = Entry(top_frame)
+        self.text_field.grid(row=0, column=1)
+        Button(top_frame, command=self.button_click, text='Send').grid(row=0, column=2)
 
-    print('Resposta: ', data.decode('utf-8'))
+        bottom_frame = Frame(self.root, width=400, height=300)
+        bottom_frame.pack(fill=BOTH)
+        bottom_frame['bg'] = 'blue'
+
+        self.text_box = Text(bottom_frame)
+        self.text_box.pack(fill=BOTH)
+        self.root.mainloop()
+
+    def button_click(self):
+        command = self.text_field.get()
+        if not command:
+            return
+        elif command == '\exit':
+            exit()
+
+        self.text_box.insert(END, "{}: {}\n".format(command, self.start_messenger(command)))
+
+    def start_messenger(self, arg):
+        host = socket.gethostname()
+        port = 8899
+        s = socket.socket() #socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            s.connect((host, port))
+        except socket.error:
+            return "Connection error. Check if server is running."
+
+        s.sendall(bytes(arg, encoding='UTF-8'))
+        data = s.recv(1024)
+        s.close()
+        answer = data.decode('utf-8')
+        print('Answer: ', answer)
+
+        return answer
 
 
-user_command = input('Insira a mensagem: ')
-while user_command is not '\exit':
-    start_messenger(user_command)
-    user_command = input('Insira a mensagem: ')
+gui = GUI()
+gui.init_gui_tkinter()
