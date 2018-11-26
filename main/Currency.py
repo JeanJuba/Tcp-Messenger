@@ -1,4 +1,3 @@
-__author__ = 'diego.garcia'
 
 import urllib.request as req
 import re

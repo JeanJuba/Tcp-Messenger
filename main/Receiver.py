@@ -1,5 +1,5 @@
 import socket
-import time
+import datetime
 from main.Currency import Cotacao
 from main import Location
 
@@ -55,11 +55,12 @@ def get_location():
 def decode_command(user_command):
     print('command received: ', user_command)
     return{
-        '\server': socket.gethostname(),
+        '\ip': socket.gethostbyname(socket.gethostname()),
         '\dev': "Jean Juba",
         '\dolar': get_dolar(),
         '\euro': get_euro(),
-        '\location': get_location()
+        '\location': get_location(),
+        '\\time': datetime.datetime.now().strftime('%d/%m/%y %H:%M:%S')
     }.get(user_command, "Not Found")
 
 

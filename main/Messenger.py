@@ -27,6 +27,7 @@ class GUI:
         Label(top_frame, text='Command: ').grid(row=0, column=0)
         self.text_field = Entry(top_frame)
         self.text_field.grid(row=0, column=1)
+        self.text_field.bind('<Return>', self.enter_pressed)
         Button(top_frame, command=self.button_click, text='Send').grid(row=0, column=2)
 
         bottom_frame = Frame(self.root, width=400, height=300)
@@ -37,6 +38,10 @@ class GUI:
         self.text_box.pack(fill=BOTH)
         self.root.mainloop()
 
+    def enter_pressed(self, event):
+        text = self.text_field.get()
+        self.add_to_text_box(text, self.start_messenger(text))
+
     def button_click(self):
         command = self.text_field.get()
         if not command:
@@ -44,12 +49,15 @@ class GUI:
         elif command == '\exit':
             exit()
 
-        self.text_box.insert(END, "{}: {}\n".format(command, self.start_messenger(command)))
+        self.add_to_text_box(command, self.start_messenger(command))
+
+    def add_to_text_box(self, command, answer):
+        self.text_box.insert(END, "{}: {}\n".format(command, answer))
 
     def start_messenger(self, arg):
         host = socket.gethostname()
         port = 8899
-        s = socket.socket() #socket.AF_INET, socket.SOCK_STREAM)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             s.connect((host, port))
         except socket.error:
