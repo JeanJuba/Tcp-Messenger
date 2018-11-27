@@ -1,5 +1,7 @@
 import socket
 import datetime
+import sys
+sys.path.append('/home/jean/Área de Trabalho/Python/TcpMessenger')
 from main.Currency import Cotacao
 from main import Location
 
@@ -8,7 +10,7 @@ def start_receiver():
     host = socket.gethostname()
     port = 8899
 
-    s = socket.socket()#socket.AF_INET, socket.SOCK_STREAM)
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((host, port))
 
     print('host: %s  port: %s' % (host, port))
