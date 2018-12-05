@@ -1,13 +1,19 @@
+import sys
+import os
+sys.path.append(os.getcwd())
+import geocoder
 import socket
 import datetime
-import sys
-sys.path.append('/home/jean/Área de Trabalho/Python/TcpMessenger')
-from main.Currency import Cotacao
-from main import Location
+
+
+import urllib.request as req
+import re
+
 
 
 def start_receiver():
     host = socket.gethostname()
+    host = socket.gethostbyname(host)
     port = 8899
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -51,7 +57,10 @@ def get_euro():
 
 
 def get_location():
-    return Location.get_location()
+    g = geocoder.ip('me')
+    j = g.geojson
+
+    return j.get('features')[0].get('properties').get('address')
 
 
 def decode_command(user_command):
@@ -64,6 +73,31 @@ def decode_command(user_command):
         '\location': get_location(),
         '\\time': datetime.datetime.now().strftime('%d/%m/%y %H:%M:%S')
     }.get(user_command, "Not Found")
+
+
+class Cotacao:
+
+    def __init__(self):
+        pass
+
+    def __get_cotacao(self, url, regex='^.*nacional" value="([0-9,]+)"'):
+        pagina = req.urlopen(url)
+        s = pagina.read().decode('utf-8')
+
+        m = re.match(regex, s, re.DOTALL)
+        if m:
+            return float(m.group(1).replace(',', '.'))
+        else:
+            return 0
+
+    def dolar(self):
+        return self.__get_cotacao('http://dolarhoje.com/')
+
+    def euro(self):
+        return self.__get_cotacao('http://eurohoje.com/')
+
+    def libra(self):
+        return self.__get_cotacao('http://librahoje.com/')
 
 
 start_receiver()

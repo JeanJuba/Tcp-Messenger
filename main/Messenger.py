@@ -29,6 +29,9 @@ class GUI:
         self.text_field.grid(row=0, column=1)
         self.text_field.bind('<Return>', self.enter_pressed)
         Button(top_frame, command=self.button_click, text='Send').grid(row=0, column=2)
+        Label(top_frame, text='Server').grid(row=0, column=3)
+        self.server_field = Entry(top_frame)
+        self.server_field.grid(row=0, column=4)
 
         bottom_frame = Frame(self.root, width=400, height=300)
         bottom_frame.pack(fill=BOTH)
@@ -45,8 +48,9 @@ class GUI:
     def button_click(self):
         command = self.text_field.get()
         if not command:
+            self.add_to_text_box("Comando inválido: ", "Favor inserir um comando válido")
             return
-        elif command == '\exit':
+        elif command[1:] == 'exit':
             exit()
 
         self.add_to_text_box(command, self.start_messenger(command))
@@ -55,7 +59,12 @@ class GUI:
         self.text_box.insert(END, "{}: {}\n".format(command, answer))
 
     def start_messenger(self, arg):
-        host = socket.gethostname()
+        #host = socket.gethostname()
+
+        host = self.server_field.get()
+        if not host:
+            return "Inform the server IP"
+
         port = 8899
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
