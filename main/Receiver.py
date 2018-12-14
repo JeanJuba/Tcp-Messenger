@@ -1,27 +1,29 @@
-import sys
-import os
-sys.path.append(os.getcwd())
 import geocoder
 import socket
 import datetime
-
-
 import urllib.request as req
 import re
-
+import sys
+import os
+from uuid import getnode as get_mac
+sys.path.append(os.getcwd())
 
 
 def start_receiver():
-    host = socket.gethostname()
-    host = socket.gethostbyname(host)
+    '''
+    Escuta a porta 8899 e processa qualquer mensagem que receber
+    :return:
+    '''
+    host = '0.0.0.0'
     port = 8899
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((host, port))
 
     print('host: %s  port: %s' % (host, port))
 
-    s.listen(1)
+    s.listen(5)
 
     while True:
         conn, addr = s.accept()
@@ -63,7 +65,21 @@ def get_location():
     return j.get('features')[0].get('properties').get('address')
 
 
+def get_sys_info():
+    return os.uname()
+
+
+def get_server_mac():
+    return get_mac()
+
+
 def decode_command(user_command):
+    '''
+    Recebe o comando do usuário e procura na lista de comandos existentes a resposta adequada.
+    :param user_command:
+    :return:
+    '''
+
     print('command received: ', user_command)
     return{
         '\ip': socket.gethostbyname(socket.gethostname()),
@@ -71,11 +87,16 @@ def decode_command(user_command):
         '\dolar': get_dolar(),
         '\euro': get_euro(),
         '\location': get_location(),
-        '\\time': datetime.datetime.now().strftime('%d/%m/%y %H:%M:%S')
+        '\\time': datetime.datetime.now().strftime('%d/%m/%y %H:%M:%S'),
+        '\sys': str(get_sys_info())[18:],
+        '\mac': str(hex(get_server_mac()))
     }.get(user_command, "Not Found")
 
 
 class Cotacao:
+    '''
+    Classe que possui os métodos para as cotações do euro e do dólar.
+    '''
 
     def __init__(self):
         pass
@@ -95,9 +116,6 @@ class Cotacao:
 
     def euro(self):
         return self.__get_cotacao('http://eurohoje.com/')
-
-    def libra(self):
-        return self.__get_cotacao('http://librahoje.com/')
 
 
 start_receiver()

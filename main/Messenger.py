@@ -8,8 +8,14 @@ class GUI:
         self.root = None
         self.text_field = None
         self.text_box = None
+        self.server_field = None
 
     def init_gui_tkinter(self):
+        '''
+        Define a interface gráfica
+        :return:
+        '''
+
         self.root = Tk()
         self.root.title('Graphic Interface')
         rw = 800
@@ -56,24 +62,44 @@ class GUI:
         self.add_to_text_box(command, self.start_messenger(command))
 
     def add_to_text_box(self, command, answer):
+        '''
+        Adiciona as mensagens para a caixa de texto
+        '''
+
         self.text_box.insert(END, "{}: {}\n".format(command, answer))
 
     def start_messenger(self, arg):
-        #host = socket.gethostname()
+        '''
+        Inicia a conexão com o IP informado na interface gráfica usando
+        a porta 8899 e enviando a mensagem digitada.
+        :param arg:
+        :return:
+        '''
 
         host = self.server_field.get()
         if not host:
             return "Inform the server IP"
 
         port = 8899
+        #self.add_to_text_box('', "Creating socket")
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #self.add_to_text_box('', "Socket created")
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
+            s.settimeout(10)
+            #self.add_to_text_box('', "Connecting to {} on port {}".format(host, port))
             s.connect((host, port))
-        except socket.error:
-            return "Connection error. Check if server is running."
+            #self.add_to_text_box('', "connected")
+            s.settimeout(None)
+        except socket.error as e:
+            return "Connection error. Check if server is running: {}".format(e)
 
+        #self.add_to_text_box('', "sending")
         s.sendall(bytes(arg, encoding='UTF-8'))
+        #self.add_to_text_box('', "sent")
+        #self.add_to_text_box('', "receiving")
         data = s.recv(1024)
+        #self.add_to_text_box('', "received")
         s.close()
         answer = data.decode('utf-8')
         print('Answer: ', answer)
